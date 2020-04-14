@@ -1,9 +1,37 @@
-import 'package:covid_19/constant.dart';
-import 'package:covid_19/widgets/my_header.dart';
+import 'package:covid19/constant.dart';
+import 'package:covid19/widgets/my_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class InfoScreen extends StatelessWidget {
+class InfoScreen extends StatefulWidget {
+  @override
+  _InfoScreen createState() => _InfoScreen();
+}
+
+class _InfoScreen extends State<InfoScreen> {
+  final controller = ScrollController();
+  double offset = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.addListener(onScroll);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    controller.dispose();
+    super.dispose();
+  }
+
+  void onScroll() {
+    setState(() {
+      offset = (controller.hasClients) ? controller.offset : 0;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,6 +43,7 @@ class InfoScreen extends StatelessWidget {
               image: "assets/icons/coronadr.svg",
               textTop: "Get to know",
               textBottom: "About Covid-19.",
+              offset: offset,
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
@@ -77,6 +106,7 @@ class PreventCard extends StatelessWidget {
   final String image;
   final String title;
   final String text;
+
   const PreventCard({
     Key key,
     this.image,
@@ -154,6 +184,7 @@ class SymptomCard extends StatelessWidget {
   final String image;
   final String title;
   final bool isActive;
+
   const SymptomCard({
     Key key,
     this.image,
