@@ -6,6 +6,6 @@ abstract class NovelCovidApiService {
 
   Future<List<Country>> getCountriesResume();
 
-  Future<List<Country>> getResumeByCountry(
+  Future<Country> getResumeByCountry(
       String iso3Country, bool exactlySearch, bool yesterdayData);
 }

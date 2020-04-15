@@ -1,14 +1,12 @@
 import 'package:covid19/constant.dart';
+import 'package:covid19/models/country.dart';
 import 'package:covid19/services/novel_covid_api_service.dart';
-import 'package:covid19/services/novel_covid_api_service_impl.dart';
 import 'package:covid19/services/service_locator.dart';
 import 'package:covid19/widgets/counter.dart';
 import 'package:covid19/widgets/my_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 
 import 'models/global_covid_case.dart';
 
@@ -43,6 +41,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final controller = ScrollController();
   double offset = 0;
+  String selectedCountry = "MEX";
+
+  GlobalCovidCase globalCovidCase = new GlobalCovidCase();
+  Country countryResumeCases = new Country();
+  List<Country> countries = [];
 
   NovelCovidApiService _apiService = locator<NovelCovidApiService>();
 
@@ -66,8 +69,31 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void getDataByCurrentCountrySelected() {
+    if(this.countries.length == 0)
+      return;
+    List<Country> temp = this
+        .countries
+        .where((item) => item.countryInfo.iso3 == this.selectedCountry)
+        .toList();
+    if (temp.length > 0) {
+      this.countryResumeCases = temp[0];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    this._apiService.getGlobalResume().then((data) {
+      this.globalCovidCase = data;
+    });
+
+    if (this.countries.length == 0) {
+      this._apiService.getCountriesResume().then((data) {
+        this.countries = data;
+        getDataByCurrentCountrySelected();
+      });
+    }
+
     return Scaffold(
       body: ListView(
         controller: controller,
@@ -78,56 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
             textBottom: "is stay at home.",
             offset: offset,
           ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            height: 60,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                color: Color(0xFFE5E5E5),
-              ),
-            ),
-            child: Row(
-              children: <Widget>[
-                SvgPicture.asset("assets/icons/maps-and-flags.svg"),
-                SizedBox(width: 20),
-                FutureBuilder<GlobalCovidCase>(
-                  future: _apiService.getGlobalResume(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(snapshot.data.cases.toString());
-                    } else if (snapshot.hasError) {
-                      return Text("${snapshot.error}");
-                    }
-
-                    // Por defecto, muestra un loading spinner
-                    return CircularProgressIndicator();
-                  },
-                ),
-                SizedBox(width: 20),
-                Expanded(
-                  child: DropdownButton(
-                    isExpanded: true,
-                    underline: SizedBox(),
-                    icon: SvgPicture.asset("assets/icons/dropdown.svg"),
-                    value: "Indonesia",
-                    items: ['Indonesia', 'Bangladesh', 'United States', 'Japan']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {},
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
+          /* SizedBox(height: 20),*/
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -138,14 +115,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: "Case Update\n",
+                            text: "Global Statistics\n",
                             style: kTitleTextstyle,
                           ),
                           TextSpan(
-                            text: "Newest update March 28",
+                            text: 'Last updated at ' +
+                                new DateTime.fromMillisecondsSinceEpoch(
+                                        globalCovidCase == null
+                                            ? 0
+                                            : globalCovidCase.updated)
+                                    .toString(),
                             style: TextStyle(
-                              color: kTextLightColor,
-                            ),
+                                color: kTextLightColor, fontSize: 13.0),
                           ),
                         ],
                       ),
@@ -154,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       "See details",
                       style: TextStyle(
-                        color: kPrimaryColor,
+                        color: kInfectedColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -179,17 +160,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: <Widget>[
                       Counter(
                         color: kInfectedColor,
-                        number: 1046,
+                        number: globalCovidCase.cases,
                         title: "Infected",
                       ),
                       Counter(
                         color: kDeathColor,
-                        number: 87,
+                        number: globalCovidCase.deaths,
                         title: "Deaths",
                       ),
                       Counter(
                         color: kRecovercolor,
-                        number: 46,
+                        number: globalCovidCase.recovered,
                         title: "Recovered",
                       ),
                     ],
@@ -200,39 +181,89 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      "Spread of Virus",
+                      "Select your country: ",
                       style: kTitleTextstyle,
-                    ),
-                    Text(
-                      "See details",
-                      style: TextStyle(
-                        color: kPrimaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
                     ),
                   ],
                 ),
+                SizedBox(height: 20),
                 Container(
-                  margin: EdgeInsets.only(top: 20),
-                  padding: EdgeInsets.all(20),
-                  height: 178,
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  height: 60,
                   width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Color(0xFFE5E5E5),
+                    ),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      SvgPicture.asset("assets/icons/maps-and-flags.svg"),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: DropdownButton(
+                          isExpanded: true,
+                          underline: SizedBox(),
+                          icon: SvgPicture.asset("assets/icons/dropdown.svg"),
+                          value: this.selectedCountry,
+                          //this code is by default
+                          items: countries
+                              .map<DropdownMenuItem<String>>((Country value) {
+                            return DropdownMenuItem<String>(
+                              value: value.countryInfo.iso3,
+                              child: Text(value.country),
+                            );
+                          }).toList(),
+                          onChanged: (selectedValue) {
+                            setState(() {
+                              this.selectedCountry = selectedValue;
+                              getDataByCurrentCountrySelected();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        offset: Offset(0, 10),
+                        offset: Offset(0, 4),
                         blurRadius: 30,
                         color: kShadowColor,
                       ),
                     ],
                   ),
-                  child: Image.asset(
-                    "assets/images/map.png",
-                    fit: BoxFit.contain,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Counter(
+                        color: kInfectedColor,
+                        number: countryResumeCases.cases,
+                        title: "Infected",
+                      ),
+                      Counter(
+                        color: kDeathColor,
+                        number: countryResumeCases.deaths,
+                        title: "Deaths",
+                      ),
+                      Counter(
+                        color: kRecovercolor,
+                        number: countryResumeCases.recovered,
+                        title: "Recovered",
+                      ),
+                    ],
                   ),
                 ),
+                SizedBox(height: 20),
               ],
             ),
           ),

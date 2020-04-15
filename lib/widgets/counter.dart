@@ -1,10 +1,12 @@
 import 'package:covid19/constant.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class Counter extends StatelessWidget {
   final int number;
   final Color color;
   final String title;
+
   const Counter({
     Key key,
     this.number,
@@ -37,10 +39,11 @@ class Counter extends StatelessWidget {
         ),
         SizedBox(height: 10),
         Text(
-          "$number",
+          NumberFormat("#,###").format(number),
           style: TextStyle(
-            fontSize: 40,
+            fontSize: 25,
             color: color,
+            locale: new Locale("en_MX")
           ),
         ),
         Text(title, style: kSubTextStyle),

@@ -28,8 +28,9 @@ class NovelCovidApiServiceImpl extends NovelCovidApiService {
       data = json.decode(response.body) as List;
       List<Country> countries = List<Country>();
       for (var item in data) {
-        countries.add(Country.fromJson(json.decode(item)));
+        countries.add(Country.fromJson(item));
       }
+      print('Countries size: ' + countries.length.toString());
       return countries;
     } else {
       // Si esta respuesta no fue OK, lanza un error.
@@ -38,18 +39,12 @@ class NovelCovidApiServiceImpl extends NovelCovidApiService {
   }
 
   @override
-  Future<List<Country>> getResumeByCountry(
+  Future<Country> getResumeByCountry(
       String iso3Country, bool exactlySearch, bool yesterdayData) async {
     final response = await http.get(
         '$apiEndpoint/countries/$iso3Country?yesterday=$yesterdayData&strict=$exactlySearch');
     if (response.statusCode == 200) {
-      List data = List();
-      data = json.decode(response.body) as List;
-      List<Country> countries = List<Country>();
-      for (var item in data) {
-        countries.add(Country.fromJson(json.decode(item)));
-      }
-      return countries;
+      return Country.fromJson(json.decode(response.body));;
     } else {
       // Si esta respuesta no fue OK, lanza un error.
       throw Exception('Failed to load post');
