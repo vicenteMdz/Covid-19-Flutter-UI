@@ -1,10 +1,21 @@
 import 'package:covid19/constant.dart';
+import 'package:covid19/services/novel_covid_api_service.dart';
+import 'package:covid19/services/novel_covid_api_service_impl.dart';
+import 'package:covid19/services/service_locator.dart';
 import 'package:covid19/widgets/counter.dart';
 import 'package:covid19/widgets/my_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-void main() => runApp(MyApp());
+import 'models/global_covid_case.dart';
+
+void main() {
+  setupServiceLocator();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -32,6 +43,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final controller = ScrollController();
   double offset = 0;
+
+  NovelCovidApiService _apiService = locator<NovelCovidApiService>();
 
   @override
   void initState() {
@@ -80,6 +93,20 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               children: <Widget>[
                 SvgPicture.asset("assets/icons/maps-and-flags.svg"),
+                SizedBox(width: 20),
+                FutureBuilder<GlobalCovidCase>(
+                  future: _apiService.getGlobalResume(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(snapshot.data.cases.toString());
+                    } else if (snapshot.hasError) {
+                      return Text("${snapshot.error}");
+                    }
+
+                    // Por defecto, muestra un loading spinner
+                    return CircularProgressIndicator();
+                  },
+                ),
                 SizedBox(width: 20),
                 Expanded(
                   child: DropdownButton(
