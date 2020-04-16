@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:covid19/constant.dart';
 import 'package:covid19/models/country.dart';
 import 'package:covid19/services/novel_covid_api_service.dart';
@@ -44,6 +46,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final controller = ScrollController();
+  Timer timer;
   double _offset = 0;
   String _selectedCountry = "MEX";
 
@@ -64,10 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement initState
     super.initState();
     controller.addListener(onScroll);
+    this.updateDataFromApi();
+    timer = Timer.periodic(Duration(minutes: 10), (Timer t) => updateDataFromApi());
+
+  }
+
+  void updateDataFromApi(){
     this._apiService.getGlobalResume().then((data) {
       _globalCovidCase = data;
       _lastUpdate =
-          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
+      new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
     });
 
     if (_countries.length == 0) {
@@ -102,27 +111,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Null> _refresh() {
-    print('Sincronized data from api rest...');
     return this._apiService.getGlobalResume().then((data) {
       _globalCovidCase = data;
       _lastUpdate =
           new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
-      print('Finish sincronized data from api rest...');
-      onScroll();
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          Future.delayed(Duration(seconds: 3), () {
-            Navigator.of(context).pop(true);
-          });
-          // return object of type Dialog
-          return AlertDialog(
-            title: new Text("Data updated successfully"),
-            content: new Text(
-                'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
-          );
-        },
-      );
+      this._apiService.getCountriesResume().then((data) {
+        _countries = data;
+        getDataByCurrentCountrySelected();
+        onScroll();
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            Future.delayed(Duration(seconds: 3), () {
+              Navigator.of(context).pop(true);
+            });
+            // return object of type Dialog
+            return AlertDialog(
+              title: new Text("Data updated successfully"),
+              content: new Text(
+                  'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
+            );
+          },
+        );
+      });
     });
   }
 
@@ -263,7 +274,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               }).toList(),
                               onChanged: (selectedValue) {
                                 setState(() {
-                                  print('Country selected: ' + selectedValue);
                                   _selectedCountry = selectedValue;
                                   getDataByCurrentCountrySelected();
                                 });
