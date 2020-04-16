@@ -41,7 +41,7 @@ class GlobalCovidCase {
         casesPerOneMillion: json['casesPerOneMillion'],
         deathsPerOneMillion: json['deathsPerOneMillion'],
         tests: json['tests'],
-        testsPerOneMillion: json['testsPerOneMillion'],
+        testsPerOneMillion: double.parse(json['testsPerOneMillion'].toString()),
         affectedCountries: json['affectedCountries']);
   }
 }

@@ -25,9 +25,9 @@ class _MyHeaderState extends State<MyHeader> {
       child: Container(
         padding: EdgeInsets.only(
             left: 40,
-            top: (50 + widget.offset < 0) ? 0 : 50 + widget.offset,
+            top: (30 + widget.offset < 0) ? 0 : 30 + widget.offset,
             right: 20),
-        height: 350,
+        height: 320,
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -61,7 +61,7 @@ class _MyHeaderState extends State<MyHeader> {
                 child: SvgPicture.asset("assets/icons/menu.svg"),
               ),
             ),
-            SizedBox(height: 20),
+            //SizedBox(height: 20),
             Expanded(
               child: Stack(
                 children: <Widget>[

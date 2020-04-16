@@ -41,7 +41,7 @@ class Counter extends StatelessWidget {
         Text(
           NumberFormat("#,###").format(number),
           style: TextStyle(
-            fontSize: 25,
+            fontSize: 23,
             color: color,
             locale: new Locale("en_MX")
           ),
