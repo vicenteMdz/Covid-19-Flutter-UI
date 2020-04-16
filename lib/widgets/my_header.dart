@@ -35,7 +35,7 @@ class _MyHeaderState extends State<MyHeader> {
             end: Alignment.bottomLeft,
             colors: [
               Color(0xFF3383CD),
-              Color(0xFF11249F),
+              Color(0xFF3383CD),
             ],
           ),
           image: DecorationImage(
@@ -45,23 +45,7 @@ class _MyHeaderState extends State<MyHeader> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Align(
-              alignment: Alignment.topRight,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return InfoScreen();
-                      },
-                    ),
-                  );
-                },
-                child: SvgPicture.asset("assets/icons/menu.svg"),
-              ),
-            ),
-            SizedBox(height: 20),
+            //SizedBox(height: 20),
             Expanded(
               child: Stack(
                 children: <Widget>[
@@ -72,23 +56,13 @@ class _MyHeaderState extends State<MyHeader> {
                     alignment: Alignment.topCenter,
                   ),
                   Positioned(
-                    top: 15,
-                    left: 150,
-                    child: Text(
-                      "Covid-19",
-                      style: kHeadingTextStyle.copyWith(
-                        fontSize: 40,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 70,
+                    top: 60,
                     left: 150,
                     child: Text(
                       "${widget.textTop} \n${widget.textBottom}",
                       style: kHeadingTextStyle.copyWith(
                         color: Colors.white,
+                        fontSize: 25
                       ),
                     ),
                   ),

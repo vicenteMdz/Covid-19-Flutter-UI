@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'main.dart';
+
 // Colors
 const kBackgroundColor = Color(0xFFFEFEFE);
 const kTitleTextColor = Color(0xFF303030);
@@ -25,3 +27,9 @@ const kTitleTextstyle = TextStyle(
   color: kPrimaryColor,
   fontWeight: FontWeight.bold,
 );
+
+const List<Choice> choices = const <Choice>[
+  const Choice(title: 'Get to know', icon: Icons.add_box),
+  const Choice(title: 'Sites References', icon: Icons.bookmark_border),
+  const Choice(title: 'About', icon: Icons.info),
+];

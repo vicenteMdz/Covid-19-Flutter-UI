@@ -7,8 +7,6 @@ import 'package:covid19/services/service_locator.dart';
 import 'package:covid19/widgets/counter.dart';
 import 'package:covid19/widgets/my_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
@@ -23,8 +21,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    FlutterStatusbarcolor.setStatusBarColor(Color(0xFF11249F));
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Covid 19',
@@ -62,21 +58,23 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime _lastUpdate = DateTime.now();
   DateFormat _dateFormat = DateFormat('yyyy-MM-dd kk:mm:ss');
 
+  Choice _selectedChoice = choices[0]; // The app's "state".
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     controller.addListener(onScroll);
     this.updateDataFromApi();
-    timer = Timer.periodic(Duration(minutes: 10), (Timer t) => updateDataFromApi());
-
+    timer =
+        Timer.periodic(Duration(minutes: 10), (Timer t) => updateDataFromApi());
   }
 
-  void updateDataFromApi(){
+  void updateDataFromApi() {
     this._apiService.getGlobalResume().then((data) {
       _globalCovidCase = data;
       _lastUpdate =
-      new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
+          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
     });
 
     if (_countries.length == 0) {
@@ -137,6 +135,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _select(Choice choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+    setState(() {
+      _selectedChoice = choice;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     this._apiService.getGlobalResume().then((data) {
@@ -150,6 +155,41 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
     return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: <Color>[
+                Color(0xFF3383CD),
+                Color(0xFF3383CD),
+              ])),
+        ),
+        title: Text(
+          "Covid-19",
+          style: kHeadingTextStyle.copyWith(
+              color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+        ),
+        actions: <Widget>[
+          PopupMenuButton<Choice>(
+            onSelected: _select,
+            itemBuilder: (BuildContext context) {
+              return choices.map((Choice choice) {
+                return PopupMenuItem<Choice>(
+                  value: choice,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(choice.icon, size: 30.0, color: kPrimaryColor),
+                      Text(choice.title),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _refresh,
@@ -178,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 TextSpan(
                                   text:
-                                  'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}',
+                                      'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}',
                                   style: TextStyle(
                                       color: kTextLightColor, fontSize: 13.0),
                                 ),
@@ -244,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 20),
                         padding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         height: 60,
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -262,17 +302,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: DropdownButton(
                                 isExpanded: true,
                                 underline: SizedBox(),
-                                icon:
-                                SvgPicture.asset("assets/icons/dropdown.svg"),
+                                icon: SvgPicture.asset(
+                                    "assets/icons/dropdown.svg"),
                                 value: _selectedCountry,
                                 //this code is by default
                                 items: _countries.map<DropdownMenuItem<String>>(
-                                        (Country value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value.countryInfo.iso3,
-                                        child: Text(value.country),
-                                      );
-                                    }).toList(),
+                                    (Country value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value.countryInfo.iso3,
+                                    child: Text(value.country),
+                                  );
+                                }).toList(),
                                 onChanged: (selectedValue) {
                                   setState(() {
                                     _selectedCountry = selectedValue;
@@ -328,4 +368,11 @@ class _HomeScreenState extends State<HomeScreen> {
           )),
     );
   }
+
+}
+
+class Choice {
+  const Choice({this.title, this.icon});
+  final String title;
+  final IconData icon;
 }
