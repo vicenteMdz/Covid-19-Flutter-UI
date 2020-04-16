@@ -61,7 +61,7 @@ class _MyHeaderState extends State<MyHeader> {
                 child: SvgPicture.asset("assets/icons/menu.svg"),
               ),
             ),
-            //SizedBox(height: 20),
+            SizedBox(height: 20),
             Expanded(
               child: Stack(
                 children: <Widget>[
@@ -72,7 +72,18 @@ class _MyHeaderState extends State<MyHeader> {
                     alignment: Alignment.topCenter,
                   ),
                   Positioned(
-                    top: 20,
+                    top: 15,
+                    left: 150,
+                    child: Text(
+                      "Covid-19",
+                      style: kHeadingTextStyle.copyWith(
+                        fontSize: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 70,
                     left: 150,
                     child: Text(
                       "${widget.textTop} \n${widget.textBottom}",

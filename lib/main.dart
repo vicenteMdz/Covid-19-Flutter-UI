@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 
 import 'models/global_covid_case.dart';
 
@@ -43,17 +44,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final controller = ScrollController();
-  double offset = 0;
-  String selectedCountry = "MEX";
+  double _offset = 0;
+  String _selectedCountry = "MEX";
 
-  GlobalCovidCase globalCovidCase = new GlobalCovidCase();
-  Country countryResumeCases = new Country();
-  List<Country> countries = [];
+  GlobalCovidCase _globalCovidCase = new GlobalCovidCase();
+  Country _countryResumeCases = new Country();
+  List<Country> _countries = [];
 
   NovelCovidApiService _apiService = locator<NovelCovidApiService>();
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+
+  DateTime _lastUpdate = DateTime.now();
+  DateFormat _dateFormat = DateFormat('yyyy-MM-dd kk:mm:ss');
 
   @override
   void initState() {
@@ -61,15 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     controller.addListener(onScroll);
     this._apiService.getGlobalResume().then((data) {
-      this.globalCovidCase = data;
-      print('call api1');
+      _globalCovidCase = data;
+      _lastUpdate =
+          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
     });
 
-    if (this.countries.length == 0) {
+    if (_countries.length == 0) {
       this._apiService.getCountriesResume().then((data) {
-        this.countries = data;
+        _countries = data;
         getDataByCurrentCountrySelected();
-        print('call api2');
       });
     }
   }
@@ -83,16 +87,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onScroll() {
     setState(() {
-      offset = (controller.hasClients) ? controller.offset : 0;
+      _offset = (controller.hasClients) ? controller.offset : 0;
     });
   }
 
   void getDataByCurrentCountrySelected() {
     this
         ._apiService
-        .getResumeByCountry(this.selectedCountry, true, false)
+        .getResumeByCountry(_selectedCountry, true, false)
         .then((data) {
-      this.countryResumeCases = data;
+      _countryResumeCases = data;
       onScroll(); //for reloading data automatically
     });
   }
@@ -100,7 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Null> _refresh() {
     print('Sincronized data from api rest...');
     return this._apiService.getGlobalResume().then((data) {
-      this.globalCovidCase = data;
+      _globalCovidCase = data;
+      _lastUpdate =
+          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
       print('Finish sincronized data from api rest...');
       onScroll();
       showDialog(
@@ -112,10 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
           // return object of type Dialog
           return AlertDialog(
             title: new Text("Data updated successfully"),
-            content: new Text('Last updated at ' +
-                new DateTime.fromMillisecondsSinceEpoch(
-                        globalCovidCase == null ? 0 : globalCovidCase.updated)
-                    .toString()),
+            content: new Text(
+                'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
           );
         },
       );
@@ -125,12 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     this._apiService.getGlobalResume().then((data) {
-      this.globalCovidCase = data;
+      _globalCovidCase = data;
     });
 
-    if (this.countries.length == 0) {
+    if (_countries.length == 0) {
       this._apiService.getCountriesResume().then((data) {
-        this.countries = data;
+        _countries = data;
         getDataByCurrentCountrySelected();
       });
     }
@@ -145,9 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 image: "assets/icons/Drcorona.svg",
                 textTop: "All you need",
                 textBottom: "is stay at home.",
-                offset: offset,
+                offset: _offset,
               ),
-              /* SizedBox(height: 20),*/
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -162,12 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: kTitleTextstyle,
                               ),
                               TextSpan(
-                                text: 'Last updated at ' +
-                                    new DateTime.fromMillisecondsSinceEpoch(
-                                            globalCovidCase == null
-                                                ? 0
-                                                : globalCovidCase.updated)
-                                        .toString(),
+                                text:
+                                    'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}',
                                 style: TextStyle(
                                     color: kTextLightColor, fontSize: 13.0),
                               ),
@@ -203,17 +202,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: <Widget>[
                           Counter(
                             color: kInfectedColor,
-                            number: globalCovidCase.cases,
+                            number: _globalCovidCase.cases,
                             title: "Infected",
                           ),
                           Counter(
                             color: kDeathColor,
-                            number: globalCovidCase.deaths,
+                            number: _globalCovidCase.deaths,
                             title: "Deaths",
                           ),
                           Counter(
                             color: kRecovercolor,
-                            number: globalCovidCase.recovered,
+                            number: _globalCovidCase.recovered,
                             title: "Recovered",
                           ),
                         ],
@@ -253,9 +252,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               underline: SizedBox(),
                               icon:
                                   SvgPicture.asset("assets/icons/dropdown.svg"),
-                              value: this.selectedCountry,
+                              value: _selectedCountry,
                               //this code is by default
-                              items: countries.map<DropdownMenuItem<String>>(
+                              items: _countries.map<DropdownMenuItem<String>>(
                                   (Country value) {
                                 return DropdownMenuItem<String>(
                                   value: value.countryInfo.iso3,
@@ -265,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               onChanged: (selectedValue) {
                                 setState(() {
                                   print('Country selected: ' + selectedValue);
-                                  this.selectedCountry = selectedValue;
+                                  _selectedCountry = selectedValue;
                                   getDataByCurrentCountrySelected();
                                 });
                               },
@@ -293,17 +292,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: <Widget>[
                           Counter(
                             color: kInfectedColor,
-                            number: countryResumeCases.cases,
+                            number: _countryResumeCases.cases,
                             title: "Infected",
                           ),
                           Counter(
                             color: kDeathColor,
-                            number: countryResumeCases.deaths,
+                            number: _countryResumeCases.deaths,
                             title: "Deaths",
                           ),
                           Counter(
                             color: kRecovercolor,
-                            number: countryResumeCases.recovered,
+                            number: _countryResumeCases.recovered,
                             title: "Recovered",
                           ),
                         ],
