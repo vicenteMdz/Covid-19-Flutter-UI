@@ -25,9 +25,9 @@ class _MyHeaderState extends State<MyHeader> {
       child: Container(
         padding: EdgeInsets.only(
             left: 40,
-            top: (30 + widget.offset < 0) ? 0 : 30 + widget.offset,
+            top: (20 + widget.offset < 0) ? 0 : 20 + widget.offset,
             right: 20),
-        height: 320,
+        height: 300,
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(

@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     FlutterStatusbarcolor.setStatusBarColor(Color(0xFF11249F));
 
     return MaterialApp(
-      debugShowCheckedModeBanner: true,
+      debugShowCheckedModeBanner: false,
       title: 'Covid 19',
       theme: ThemeData(
           scaffoldBackgroundColor: kBackgroundColor,
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
   NovelCovidApiService _apiService = locator<NovelCovidApiService>();
 
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  new GlobalKey<RefreshIndicatorState>();
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
@@ -93,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .getResumeByCountry(this.selectedCountry, true, false)
         .then((data) {
       this.countryResumeCases = data;
+      onScroll(); //for reloading data automatically
     });
   }
 
@@ -101,12 +102,28 @@ class _HomeScreenState extends State<HomeScreen> {
     return this._apiService.getGlobalResume().then((data) {
       this.globalCovidCase = data;
       print('Finish sincronized data from api rest...');
+      onScroll();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          Future.delayed(Duration(seconds: 3), () {
+            Navigator.of(context).pop(true);
+          });
+          // return object of type Dialog
+          return AlertDialog(
+            title: new Text("Data updated successfully"),
+            content: new Text('Last updated at ' +
+                new DateTime.fromMillisecondsSinceEpoch(
+                        globalCovidCase == null ? 0 : globalCovidCase.updated)
+                    .toString()),
+          );
+        },
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     this._apiService.getGlobalResume().then((data) {
       this.globalCovidCase = data;
     });
@@ -147,9 +164,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               TextSpan(
                                 text: 'Last updated at ' +
                                     new DateTime.fromMillisecondsSinceEpoch(
-                                        globalCovidCase == null
-                                            ? 0
-                                            : globalCovidCase.updated)
+                                            globalCovidCase == null
+                                                ? 0
+                                                : globalCovidCase.updated)
                                         .toString(),
                                 style: TextStyle(
                                     color: kTextLightColor, fontSize: 13.0),
@@ -216,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 20),
                       padding:
-                      EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                       height: 60,
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -235,16 +252,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               isExpanded: true,
                               underline: SizedBox(),
                               icon:
-                              SvgPicture.asset("assets/icons/dropdown.svg"),
+                                  SvgPicture.asset("assets/icons/dropdown.svg"),
                               value: this.selectedCountry,
                               //this code is by default
                               items: countries.map<DropdownMenuItem<String>>(
-                                      (Country value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value.countryInfo.iso3,
-                                      child: Text(value.country),
-                                    );
-                                  }).toList(),
+                                  (Country value) {
+                                return DropdownMenuItem<String>(
+                                  value: value.countryInfo.iso3,
+                                  child: Text(value.country),
+                                );
+                              }).toList(),
                               onChanged: (selectedValue) {
                                 setState(() {
                                   print('Country selected: ' + selectedValue);
