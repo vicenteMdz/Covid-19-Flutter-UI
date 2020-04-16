@@ -30,7 +30,6 @@ class NovelCovidApiServiceImpl extends NovelCovidApiService {
       for (var item in data) {
         countries.add(Country.fromJson(item));
       }
-      print('Countries size: ' + countries.length.toString());
       return countries;
     } else {
       // Si esta respuesta no fue OK, lanza un error.

@@ -29,7 +29,10 @@ const kTitleTextstyle = TextStyle(
 );
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Get to know', icon: Icons.add_box),
-  const Choice(title: 'Sites References', icon: Icons.bookmark_border),
-  const Choice(title: 'About', icon: Icons.info),
+  const Choice(title: 'Get to know', icon: Icons.add_box, id: 'get_to_know'),
+  const Choice(
+      title: 'Sites References',
+      icon: Icons.bookmark_border,
+      id: 'sites_references'),
+  const Choice(title: 'About', icon: Icons.info, id: 'about'),
 ];

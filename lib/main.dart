@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:covid19/about_app.dart';
 import 'package:covid19/constant.dart';
 import 'package:covid19/models/country.dart';
 import 'package:covid19/services/novel_covid_api_service.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
+import 'info_screen.dart';
 import 'models/global_covid_case.dart';
 
 void main() {
@@ -71,18 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void updateDataFromApi() {
+    print('Quering data... ' + new DateTime.now().toString());
     this._apiService.getGlobalResume().then((data) {
       _globalCovidCase = data;
       _lastUpdate =
           new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
-    });
-
-    if (_countries.length == 0) {
       this._apiService.getCountriesResume().then((data) {
         _countries = data;
         getDataByCurrentCountrySelected();
       });
-    }
+    });
   }
 
   @override
@@ -139,6 +139,25 @@ class _HomeScreenState extends State<HomeScreen> {
     // Causes the app to rebuild with the new _selectedChoice.
     setState(() {
       _selectedChoice = choice;
+      switch (_selectedChoice.id) {
+        case 'get_to_know':
+          {}
+          break;
+        case 'sites_references':
+          {}
+          break;
+        case 'about':
+          {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AboutApp()),
+            );
+          }
+          break;
+        default:
+          {}
+          break;
+      }
     });
   }
 
@@ -368,11 +387,12 @@ class _HomeScreenState extends State<HomeScreen> {
           )),
     );
   }
-
 }
 
 class Choice {
-  const Choice({this.title, this.icon});
+  const Choice({this.title, this.icon, this.id});
+
   final String title;
   final IconData icon;
+  final String id;
 }
