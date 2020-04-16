@@ -153,176 +153,178 @@ class _HomeScreenState extends State<HomeScreen> {
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _refresh,
-          child: ListView(
-            controller: controller,
-            children: <Widget>[
-              MyHeader(
-                image: "assets/icons/Drcorona.svg",
-                textTop: "All you need",
-                textBottom: "is stay at home.",
-                offset: _offset,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Global Statistics\n",
-                                style: kTitleTextstyle,
-                              ),
-                              TextSpan(
-                                text:
-                                    'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}',
-                                style: TextStyle(
-                                    color: kTextLightColor, fontSize: 13.0),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          "See details",
-                          style: TextStyle(
-                            color: kInfectedColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            offset: Offset(0, 4),
-                            blurRadius: 30,
-                            color: kShadowColor,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Scrollbar(
+            child: ListView(
+              controller: controller,
+              children: <Widget>[
+                MyHeader(
+                  image: "assets/icons/Drcorona.svg",
+                  textTop: "All you need",
+                  textBottom: "is stay at home.",
+                  offset: _offset,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
                         children: <Widget>[
-                          Counter(
-                            color: kInfectedColor,
-                            number: _globalCovidCase.cases,
-                            title: "Infected",
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Global Statistics\n",
+                                  style: kTitleTextstyle,
+                                ),
+                                TextSpan(
+                                  text:
+                                  'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}',
+                                  style: TextStyle(
+                                      color: kTextLightColor, fontSize: 13.0),
+                                ),
+                              ],
+                            ),
                           ),
-                          Counter(
-                            color: kDeathColor,
-                            number: _globalCovidCase.deaths,
-                            title: "Deaths",
-                          ),
-                          Counter(
-                            color: kRecovercolor,
-                            number: _globalCovidCase.recovered,
-                            title: "Recovered",
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          "Select your country: ",
-                          style: kTitleTextstyle,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 20),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                      height: 60,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(
-                          color: Color(0xFFE5E5E5),
-                        ),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SvgPicture.asset("assets/icons/maps-and-flags.svg"),
-                          SizedBox(width: 20),
-                          Expanded(
-                            child: DropdownButton(
-                              isExpanded: true,
-                              underline: SizedBox(),
-                              icon:
-                                  SvgPicture.asset("assets/icons/dropdown.svg"),
-                              value: _selectedCountry,
-                              //this code is by default
-                              items: _countries.map<DropdownMenuItem<String>>(
-                                  (Country value) {
-                                return DropdownMenuItem<String>(
-                                  value: value.countryInfo.iso3,
-                                  child: Text(value.country),
-                                );
-                              }).toList(),
-                              onChanged: (selectedValue) {
-                                setState(() {
-                                  _selectedCountry = selectedValue;
-                                  getDataByCurrentCountrySelected();
-                                });
-                              },
+                          Spacer(),
+                          Text(
+                            "See details",
+                            style: TextStyle(
+                              color: kInfectedColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            offset: Offset(0, 4),
-                            blurRadius: 30,
-                            color: kShadowColor,
-                          ),
-                        ],
+                      SizedBox(height: 20),
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              offset: Offset(0, 4),
+                              blurRadius: 30,
+                              color: kShadowColor,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Counter(
+                              color: kInfectedColor,
+                              number: _globalCovidCase.cases,
+                              title: "Infected",
+                            ),
+                            Counter(
+                              color: kDeathColor,
+                              number: _globalCovidCase.deaths,
+                              title: "Deaths",
+                            ),
+                            Counter(
+                              color: kRecovercolor,
+                              number: _globalCovidCase.recovered,
+                              title: "Recovered",
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Row(
+                      SizedBox(height: 20),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Counter(
-                            color: kInfectedColor,
-                            number: _countryResumeCases.cases,
-                            title: "Infected",
-                          ),
-                          Counter(
-                            color: kDeathColor,
-                            number: _countryResumeCases.deaths,
-                            title: "Deaths",
-                          ),
-                          Counter(
-                            color: kRecovercolor,
-                            number: _countryResumeCases.recovered,
-                            title: "Recovered",
+                          Text(
+                            "Select your country: ",
+                            style: kTitleTextstyle,
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
+                      SizedBox(height: 20),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 20),
+                        padding:
+                        EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        height: 60,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: Color(0xFFE5E5E5),
+                          ),
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            SvgPicture.asset("assets/icons/maps-and-flags.svg"),
+                            SizedBox(width: 20),
+                            Expanded(
+                              child: DropdownButton(
+                                isExpanded: true,
+                                underline: SizedBox(),
+                                icon:
+                                SvgPicture.asset("assets/icons/dropdown.svg"),
+                                value: _selectedCountry,
+                                //this code is by default
+                                items: _countries.map<DropdownMenuItem<String>>(
+                                        (Country value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value.countryInfo.iso3,
+                                        child: Text(value.country),
+                                      );
+                                    }).toList(),
+                                onChanged: (selectedValue) {
+                                  setState(() {
+                                    _selectedCountry = selectedValue;
+                                    getDataByCurrentCountrySelected();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              offset: Offset(0, 4),
+                              blurRadius: 30,
+                              color: kShadowColor,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Counter(
+                              color: kInfectedColor,
+                              number: _countryResumeCases.cases,
+                              title: "Infected",
+                            ),
+                            Counter(
+                              color: kDeathColor,
+                              number: _countryResumeCases.deaths,
+                              title: "Deaths",
+                            ),
+                            Counter(
+                              color: kRecovercolor,
+                              number: _countryResumeCases.recovered,
+                              title: "Recovered",
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           )),
     );
   }
