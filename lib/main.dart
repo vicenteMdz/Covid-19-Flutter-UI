@@ -72,16 +72,47 @@ class _HomeScreenState extends State<HomeScreen> {
         Timer.periodic(Duration(minutes: 10), (Timer t) => updateDataFromApi());
   }
 
-  void updateDataFromApi() {
+  Future<Null> updateDataFromApi() {
     print('Quering data... ' + new DateTime.now().toString());
     this._apiService.getGlobalResume().then((data) {
-      _globalCovidCase = data;
-      _lastUpdate =
-          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
-      this._apiService.getCountriesResume().then((data) {
-        _countries = data;
-        getDataByCurrentCountrySelected();
-      });
+      if (_globalCovidCase.updated == data.updated) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            Future.delayed(Duration(seconds: 3), () {
+              Navigator.of(context).pop(true);
+            });
+            // return object of type Dialog
+            return AlertDialog(
+              title: new Text("Data updated successfully"),
+              content: new Text(
+                  'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
+            );
+          },
+        );
+      } else {
+        _globalCovidCase = data;
+        _lastUpdate =
+            new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
+        this._apiService.getCountriesResume().then((data) {
+          _countries = data;
+          getDataByCurrentCountrySelected();
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              Future.delayed(Duration(seconds: 3), () {
+                Navigator.of(context).pop(true);
+              });
+              // return object of type Dialog
+              return AlertDialog(
+                title: new Text("Data updated successfully"),
+                content: new Text(
+                    'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
+              );
+            },
+          );
+        });
+      }
     });
   }
 
@@ -110,13 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Null> _refresh() {
     return this._apiService.getGlobalResume().then((data) {
-      _globalCovidCase = data;
-      _lastUpdate =
-          new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
-      this._apiService.getCountriesResume().then((data) {
-        _countries = data;
-        getDataByCurrentCountrySelected();
-        onScroll();
+      if (_globalCovidCase.updated == data.updated) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -131,7 +156,30 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         );
-      });
+      } else {
+        _globalCovidCase = data;
+        _lastUpdate =
+            new DateTime.fromMillisecondsSinceEpoch(_globalCovidCase.updated);
+        this._apiService.getCountriesResume().then((data) {
+          _countries = data;
+          getDataByCurrentCountrySelected();
+          onScroll();
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              Future.delayed(Duration(seconds: 3), () {
+                Navigator.of(context).pop(true);
+              });
+              // return object of type Dialog
+              return AlertDialog(
+                title: new Text("Data updated successfully"),
+                content: new Text(
+                    'Last updated at ${_dateFormat.format(_lastUpdate)} ${_lastUpdate.timeZoneName}'),
+              );
+            },
+          );
+        });
+      }
     });
   }
 
